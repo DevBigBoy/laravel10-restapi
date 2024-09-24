@@ -1,8 +1,12 @@
 <?php
 
-use App\Http\Controllers\Api\SettingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\TokenController;
+use App\Http\Controllers\Api\Auth\LogoutController;
+use App\Http\Controllers\Api\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,8 +24,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
+Route::middleware('guest')->group(function () {
+    Route::post('/login', LoginController::class);
+    Route::post('/register', [RegisterController::class, 'register']);
+});
 
-Route::middleware('auth:sanctum')->group(function () {});
-
-
-Route::get('/settings', SettingController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('refresh-token', TokenController::class);
+    Route::post('logout', LogoutController::class);
+});

@@ -2,11 +2,14 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use App\Traits\HttpResponses;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
+    use HttpResponses;
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -44,5 +47,20 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $exception)
+    {
+        // Handle validation exceptions and return a custom error response
+        if ($exception instanceof ValidationException) {
+            return $this->error(
+                $exception->errors(),    // Pass validation errors as data
+                'Invalid data provided', // Custom message
+                422                      // HTTP status code for validation errors
+            );
+        }
+
+        // Use the parent render method for other exceptions
+        return parent::render($request, $exception);
     }
 }
